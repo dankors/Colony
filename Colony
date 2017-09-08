@@ -14,7 +14,7 @@ struct Coor: Hashable {
     }
     
     static func == (lhs: Coor, rhs: Coor) -> Bool {
-        return lhs.xCoor == rhs.xCoor && lhs.yCoor == rhs.yCoor
+        return lhs.xCoor == lhs.xCoor && rhs.yCoor == rhs.yCoor
     }
     
 }
@@ -32,14 +32,14 @@ class Colony: CustomStringConvertible {
     }
     
     func setCellAlive(xCoor: Int, yCoor: Int) {
-        let c = Coor(xCoor: xCoor, yCoor: xCoor)
+        let c = Coor(xCoor: xCoor, yCoor: yCoor)
         if withinBoundaries(x: xCoor, y: yCoor) {
         cells.insert(c)
         }
     }
     
     func setCellDead(xCoor: Int, yCoor: Int) {
-        let c = Coor(xCoor: xCoor, yCoor: xCoor)
+        let c = Coor(xCoor: xCoor, yCoor: yCoor)
         cells.remove(c)
     }
     
@@ -48,7 +48,7 @@ class Colony: CustomStringConvertible {
     }
     
     func isCellAlive(xCoor: Int, yCoor: Int) -> Bool {
-        let c = Coor(xCoor: xCoor, yCoor: xCoor)
+        let c = Coor(xCoor: xCoor, yCoor: yCoor)
         return cells.contains(c)
     }
     
@@ -105,7 +105,7 @@ class Colony: CustomStringConvertible {
         if isCellAlive(xCoor: xCoor, yCoor: yCoor) {
             return "*"
         }
-        return " "
+        return "-"
     }
     
     var description: String {
