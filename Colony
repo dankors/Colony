@@ -1,0 +1,122 @@
+import Foundation
+
+struct Coor: Hashable {
+    var xCoor: Int
+    var yCoor: Int
+    
+    init(xCoor: Int, yCoor: Int) {
+        self.xCoor = xCoor
+        self.yCoor = yCoor
+    }
+    
+    var hashValue: Int {
+        return xCoor.hashValue * 100 + yCoor.hashValue
+    }
+    
+    static func == (lhs: Coor, rhs: Coor) -> Bool {
+        return lhs.xCoor == rhs.xCoor && lhs.yCoor == rhs.yCoor
+    }
+    
+}
+
+
+class Colony: CustomStringConvertible {
+    var cells = Set<Coor>()
+    var generation = 0
+    
+    func withinBoundaries(x: Int, y: Int) -> Bool {
+        if x >= 0 && y >= 0 && x <= 20 && y <= 20 {
+            return true
+        }
+        return false
+    }
+    
+    func setCellAlive(xCoor: Int, yCoor: Int) {
+        let c = Coor(xCoor: xCoor, yCoor: xCoor)
+        if withinBoundaries(x: xCoor, y: yCoor) {
+        cells.insert(c)
+        }
+    }
+    
+    func setCellDead(xCoor: Int, yCoor: Int) {
+        let c = Coor(xCoor: xCoor, yCoor: xCoor)
+        cells.remove(c)
+    }
+    
+    func resetColony() {
+        cells.removeAll()
+    }
+    
+    func isCellAlive(xCoor: Int, yCoor: Int) -> Bool {
+        let c = Coor(xCoor: xCoor, yCoor: xCoor)
+        return cells.contains(c)
+    }
+    
+    func findCellsToCheck() -> Set<Coor> {
+        var checkedCells = Set<Coor>()
+        for c in cells {
+            for y in (c.yCoor + 1)...(c.yCoor - 1) {
+                for x in (c.xCoor - 1)...(c.yCoor + 1) {
+                    if withinBoundaries(x: x, y: y) {
+                        let checked = Coor(xCoor: x, yCoor: y)
+                        checkedCells.insert(checked)
+                    }
+                }
+            }
+        }
+        return checkedCells
+    }
+    
+    func aliveInNextGen(l: Int, cell: Coor) -> Bool {
+        let n = l - 1 //exclude cell being judged
+        if cells.contains(cell) {
+            if (n < 2) || (n > 3) {
+                return false
+            }
+            return true
+        } else if n == 3 {
+            return true
+        }
+        return false
+    }
+    
+    func evolve() {
+        let checkedCells = findCellsToCheck()
+        var newCells = Set<Coor>()
+        for cell in checkedCells {
+            var living = 0
+            for y in (cell.yCoor + 1)...(cell.yCoor - 1) {
+                for x in (cell.xCoor - 1)...(cell.yCoor + 1) {
+                    if isCellAlive(xCoor: x, yCoor: y) {
+                        living += 1
+                    }
+                    if aliveInNextGen(l: living, cell: cell) {
+                        newCells.insert(cell)
+                    }
+                }
+            }
+        }
+        generation += 1
+        cells = newCells
+    }
+    
+    
+    func deadOrAlive(xCoor: Int, yCoor: Int) -> String {
+        if isCellAlive(xCoor: xCoor, yCoor: yCoor) {
+            return "*"
+        }
+        return " "
+    }
+    
+    var description: String {
+        var result = "Generation #\(generation)\n\n"
+        for y in stride(from: 20, through: 0, by: -1) {
+            for x in 0...20 {
+                result += deadOrAlive(xCoor: x, yCoor: y)
+            }
+            result += "\n"
+        }
+        return result
+    }
+    
+}
