@@ -1,3 +1,11 @@
+//
+//  Colony.swift
+//  Colony
+//
+//  Created by Daniel Korsunsky on 9/6/17.
+//  Copyright © 2017 Daniel Korsunsky. All rights reserved.
+//
+
 import Foundation
 
 struct Coor: Hashable {
@@ -14,7 +22,7 @@ struct Coor: Hashable {
     }
     
     static func == (lhs: Coor, rhs: Coor) -> Bool {
-        return lhs.xCoor == lhs.xCoor && rhs.yCoor == rhs.yCoor
+        return lhs.xCoor == rhs.xCoor && lhs.yCoor == rhs.yCoor
     }
     
 }
@@ -45,6 +53,7 @@ class Colony: CustomStringConvertible {
     
     func resetColony() {
         cells.removeAll()
+        generation = 0
     }
     
     func isCellAlive(xCoor: Int, yCoor: Int) -> Bool {
@@ -55,8 +64,8 @@ class Colony: CustomStringConvertible {
     func findCellsToCheck() -> Set<Coor> {
         var checkedCells = Set<Coor>()
         for c in cells {
-            for y in (c.yCoor + 1)...(c.yCoor - 1) {
-                for x in (c.xCoor - 1)...(c.yCoor + 1) {
+            for y in (c.yCoor - 1)...(c.yCoor + 1) {
+                for x in (c.xCoor - 1)...(c.xCoor + 1) {
                     if withinBoundaries(x: x, y: y) {
                         let checked = Coor(xCoor: x, yCoor: y)
                         checkedCells.insert(checked)
@@ -68,13 +77,13 @@ class Colony: CustomStringConvertible {
     }
     
     func aliveInNextGen(l: Int, cell: Coor) -> Bool {
-        let n = l - 1 //exclude cell being judged
         if cells.contains(cell) {
+            let n = l - 1 //excludes cell being judged
             if (n < 2) || (n > 3) {
                 return false
             }
             return true
-        } else if n == 3 {
+        } else if l == 3 {
             return true
         }
         return false
@@ -85,15 +94,15 @@ class Colony: CustomStringConvertible {
         var newCells = Set<Coor>()
         for cell in checkedCells {
             var living = 0
-            for y in (cell.yCoor + 1)...(cell.yCoor - 1) {
-                for x in (cell.xCoor - 1)...(cell.yCoor + 1) {
+            for y in (cell.yCoor - 1)...(cell.yCoor + 1) {
+                for x in (cell.xCoor - 1)...(cell.xCoor + 1) {
                     if isCellAlive(xCoor: x, yCoor: y) {
                         living += 1
                     }
-                    if aliveInNextGen(l: living, cell: cell) {
-                        newCells.insert(cell)
-                    }
                 }
+            }
+            if aliveInNextGen(l: living, cell: cell) {
+                newCells.insert(cell)
             }
         }
         generation += 1
@@ -105,7 +114,7 @@ class Colony: CustomStringConvertible {
         if isCellAlive(xCoor: xCoor, yCoor: yCoor) {
             return "*"
         }
-        return "-"
+        return " "
     }
     
     var description: String {
@@ -119,4 +128,19 @@ class Colony: CustomStringConvertible {
         return result
     }
     
+}
+
+
+//test code
+
+var c = Colony()
+c.setCellAlive(xCoor: 6, yCoor: 6)
+c.setCellAlive(xCoor: 5, yCoor: 5)
+c.setCellAlive(xCoor: 6, yCoor: 5)
+c.setCellAlive(xCoor: 7, yCoor: 5)
+print(c)
+
+for _ in 0..<10 {
+    c.evolve()
+    print(c)
 }
